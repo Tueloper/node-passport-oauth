@@ -6,6 +6,8 @@ const logger = require("morgan");
 const debug = require("debug")("request-form:server");
 const http = require("http");
 const expEj = require("express-ejs-layouts");
+const mongoose = require("mongoose");
+const keys = require("./config/keys");
 require("dotenv").config();
 
 const indexRouter = require("./routes/index");
@@ -13,16 +15,30 @@ var usersRouter = require("./routes/users");
 
 var app = express();
 
+//DB setup
+mongoose.connect(
+  keys.Mongo_Url,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+  },
+  (client, err) => {
+    if (err) console.log("Database connection failed");
+    if (client) console.log("MongoDB_Dev Connected");
+  }
+);
+
 // view engine setup
 app.use(expEj);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+//BodyParser
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
